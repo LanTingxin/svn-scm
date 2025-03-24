@@ -2,6 +2,7 @@ import { window } from "vscode";
 import { getConflictPickOptions } from "../conflictItems";
 import { Repository } from "../repository";
 import { Command } from "./command";
+import SvnError from "../svnError";
 
 export class ResolveAll extends Command {
   constructor() {
@@ -32,7 +33,8 @@ export class ResolveAll extends Command {
         );
         window.showInformationMessage(response);
       } catch (error) {
-        window.showErrorMessage(error.stderr);
+
+        window.showErrorMessage((error as SvnError).stderr || "Resolve failed");
       }
     }
   }

@@ -25,6 +25,7 @@ import { IsSvn19orGreater } from "./contexts/isSvn19orGreater";
 import { IsSvn18orGreater } from "./contexts/isSvn18orGreater";
 import { tempSvnFs } from "./temp_svn_fs";
 import { SvnFileSystemProvider } from "./svnFileSystemProvider";
+import SvnError from "./svnError";
 
 async function init(
   extensionContext: ExtensionContext,
@@ -83,7 +84,7 @@ async function _activate(context: ExtensionContext, disposables: Disposable[]) {
     try {
       await init(context, outputChannel, disposables);
     } catch (err) {
-      if (!/Svn installation not found/.test(err.message || "")) {
+      if (!/Svn installation not found/.test((err as SvnError).message || "")) {
         throw err;
       }
 
@@ -94,8 +95,9 @@ async function _activate(context: ExtensionContext, disposables: Disposable[]) {
         return;
       }
 
-      console.warn(err.message);
-      outputChannel.appendLine(err.message);
+      let err2 = err as SvnError;
+      console.warn(err2.message);
+      outputChannel.appendLine(err2.message);
       outputChannel.show();
 
       const findSvnExecutable = "Find SVN executable";

@@ -6,6 +6,7 @@ import { inputCommitMessage } from "../messages";
 import { Repository } from "../repository";
 import { Resource } from "../resource";
 import { Command } from "./command";
+import SvnError from "../svnError";
 
 export class CommitWithMessage extends Command {
   constructor() {
@@ -57,7 +58,8 @@ export class CommitWithMessage extends Command {
       repository.inputBox.value = "";
     } catch (error) {
       console.error(error);
-      window.showErrorMessage(error.stderrFormated);
+      const errorMessage = (error as SvnError)?.stderrFormated || "commit failed";
+      window.showErrorMessage(errorMessage);
     }
   }
 }

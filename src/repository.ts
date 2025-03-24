@@ -54,6 +54,7 @@ import {
 } from "./util";
 import { match, matchAll } from "./util/globMatch";
 import { RepositoryFilesWatcher } from "./watchers/repositoryFilesWatcher";
+import SvnError from "./svnError";
 
 function shouldShowProgress(operation: Operation): boolean {
   switch (operation) {
@@ -1103,7 +1104,7 @@ export class Repository implements IRemoteRepository {
 
         return result;
       } catch (err) {
-        if (err.svnErrorCode === svnErrorCodes.NotASvnRepository) {
+        if (err instanceof SvnError && err.svnErrorCode === svnErrorCodes.NotASvnRepository) {
           this.state = RepositoryState.Disposed;
         }
 
@@ -1138,13 +1139,13 @@ export class Repository implements IRemoteRepository {
         return result;
       } catch (err) {
         if (
-          err.svnErrorCode === svnErrorCodes.RepositoryIsLocked &&
+          (err as SvnError).svnErrorCode === svnErrorCodes.RepositoryIsLocked &&
           attempt <= 10
         ) {
           // quatratic backoff
           await timeout(Math.pow(attempt, 2) * 50);
         } else if (
-          err.svnErrorCode === svnErrorCodes.AuthorizationFailed &&
+          (err as SvnError).svnErrorCode === svnErrorCodes.AuthorizationFailed &&
           attempt <= 1 + accounts.length
         ) {
           // First attempt load all stored auths
@@ -1159,7 +1160,7 @@ export class Repository implements IRemoteRepository {
             this.password = accounts[index].password;
           }
         } else if (
-          err.svnErrorCode === svnErrorCodes.AuthorizationFailed &&
+          (err as SvnError).svnErrorCode === svnErrorCodes.AuthorizationFailed &&
           attempt <= 3 + accounts.length
         ) {
           const result = await this.promptAuth();

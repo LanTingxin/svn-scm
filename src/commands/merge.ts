@@ -28,8 +28,8 @@ export class Merge extends Command {
     try {
       await repository.merge(branch.path, reintegrate);
     } catch (error) {
-      if (typeof error === "object" && error.hasOwnProperty("stderrFormated")) {
-        if (error.stderrFormated.includes("try updating first")) {
+      if (error !== null && typeof error === "object" && 'stderrFormated' in error) {
+        if (typeof error.stderrFormated === 'string' && error.stderrFormated.includes("try updating first")) {
           const answer = await window.showErrorMessage(
             "Seems like you need to update first prior to merging. " +
               "Would you like to update now and try merging again?",

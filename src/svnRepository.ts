@@ -483,23 +483,25 @@ export class Repository {
   public async addFilesByIgnore(files: string[], ignoreList: string[]) {
     const allFiles = async (file: string): Promise<string[]> => {
       if ((await stat(file)).isDirectory()) {
-        return (
-          await Promise.all(
-            (await readdir(file)).map(subfile => {
-              const abspath = path.resolve(file + path.sep + subfile);
-              const relpath = this.removeAbsolutePath(abspath);
-              if (
-                !matchAll(path.sep + relpath, ignoreList, {
-                  dot: true,
-                  matchBase: true
-                })
-              ) {
-                return allFiles(abspath);
-              }
-              return [];
-            })
-          )
-        ).reduce((acc, cur) => acc.concat(cur), [file]);
+        // 使用扩展运算符和明确类型标注解决类型推断问题
+        const subfiles = await Promise.all(
+          (await readdir(file)).map(subfile => {
+            const abspath = path.resolve(file + path.sep + subfile);
+            const relpath = this.removeAbsolutePath(abspath);
+            if (
+              !matchAll(path.sep + relpath, ignoreList, {
+                dot: true,
+                matchBase: true
+              })
+            ) {
+              return allFiles(abspath);
+            }
+            return [] as string[];
+          })
+        );
+        
+        // 更改这一行，使用扩展运算符替代 reduce
+        return [file, ...subfiles.flat()];
       }
       return [file];
     };
@@ -507,7 +509,7 @@ export class Repository {
     files = files.map(file => this.removeAbsolutePath(file));
     return this.exec(["add", "--depth=empty", ...files]);
   }
-
+  
   public addFiles(files: string[]) {
     const ignoreList = configuration.get<string[]>("sourceControl.ignore");
     if (ignoreList.length > 0) {

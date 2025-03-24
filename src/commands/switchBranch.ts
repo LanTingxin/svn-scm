@@ -33,8 +33,10 @@ export class SwitchBranch extends Command {
           await repository.switchBranch(branch.path);
         } catch (error) {
           if (
+            error !== null &&
             typeof error === "object" &&
-            error.hasOwnProperty("stderrFormated") &&
+            'stderrFormated' in error &&
+            typeof error.stderrFormated === 'string' &&
             error.stderrFormated.includes("ignore-ancestry")
           ) {
             const answer = await window.showErrorMessage(

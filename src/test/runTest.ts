@@ -12,7 +12,11 @@ async function main() {
       extensionTestsPath
     });
   } catch (err) {
-    console.error(`Failed to run tests: ${err}\n${err.stack}`);
+    if (err instanceof Error) {
+      console.error(`Failed to run tests: ${err.message}\n${err.stack}`);
+    } else {
+      console.error(`Failed to run tests: ${err}`);
+    }
     process.exit(1);
   }
 }

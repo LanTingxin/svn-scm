@@ -7,6 +7,7 @@ import { configuration } from "../helpers/configuration";
 import { SourceControlManager } from "../source_control_manager";
 import { svnErrorCodes } from "../svn";
 import { Command } from "./command";
+import SvnError from "../svnError";
 
 export class Checkout extends Command {
   constructor() {
@@ -98,7 +99,7 @@ export class Checkout extends Command {
         break;
       } catch (err) {
         if (
-          err.svnErrorCode === svnErrorCodes.AuthorizationFailed &&
+          (err as SvnError).svnErrorCode === svnErrorCodes.AuthorizationFailed &&
           attempt <= 3
         ) {
           const auth = (await commands.executeCommand(
